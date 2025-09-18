@@ -97,6 +97,27 @@ git remote add origin <url> # 绑定远程仓库
 
 ---
 
+## 💡 其他
 
+### 设置代理
+
+```bash
+# 设置代理
+git config --global http.proxy http://127.0.0.1:7890
+git config --global https.proxy http://127.0.0.1:7890
+# 查看当前配置
+git config --global --get http.proxy
+git config --global --get https.proxy
+# 取消代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
+
+### 设置用户名
+
+```bash
+git config --global user.name "你的用户名"
+git config --global user.email"你的邮箱"
+```
 
 
