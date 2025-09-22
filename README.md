@@ -17,3 +17,33 @@
 * `memory_order_acq_rel`
 
 * `memory_order_seq_cst`
+
+## CPU缓存和缓存一致性
+
+### 缓存层次（Cache Hierarchy）
+
+| 层级  | 容量         | 速度  | 特点              |
+| --- | ---------- | --- | --------------- |
+| L1  | 32KB左右     | 最快  | 每个核心独立，分指令/数据缓存 |
+| L2  | 256KB-1MB  | 中速  | 每个核心独立          |
+| L3  | 几 MB-几十 MB | 慢   | 多核心共享，主存访问缓冲    |
+
+### 缓存行（Cache Line）
+
+- 最小缓存单位，通常 **64 字节**
+
+- CPU 一次性读取整行到缓存
+
+- 高频访问变量在同一缓存行 → 可能发生 **伪共享（False Sharing）**
+
+### alignas
+
+指定变量或类型的对齐方式
+
+
+
+## CMake
+
+```cmake
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # 生成compile_commands.json
+```
