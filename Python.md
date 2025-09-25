@@ -22,4 +22,19 @@ pip show package_name               # 查看包信息
 pip freeze > requirements.txt       # 导出依赖
 ```
 
+### python源码构建
+
+```bash
+python -m pip install build
+python -m build
+
+
+# 安装
+pip install module.whl
+pip install --upgrade xxx.whl # 升级安装
+/path/to/python -m pip install xxx.whl # 指定python解释器
+pip install xxx.whl --no-deps # 不自动安装依赖
+pip install --force-reinstall xxx.whl # 强制安装，适用于版本号一样，需要强制更新
+```
+
 

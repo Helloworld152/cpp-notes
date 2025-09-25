@@ -42,6 +42,26 @@
 
 
 
+### AoS vs SoA
+
+- **AoS (Array of Structures)**：每个对象的所有字段连续
+
+- **SoA (Structure of Arrays)**：同一字段的所有对象连续
+
+```cpp
+// AoS
+struct Tick { double price; int volume; };
+std::vector<Tick> ticks;
+
+// SoA
+std::vector<double> prices;
+std::vector<int> volumes;
+```
+
+
+
+### 
+
 ## CMake
 
 ```cmake
