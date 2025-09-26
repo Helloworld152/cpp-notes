@@ -95,6 +95,14 @@ git remote add origin <url> # 绑定远程仓库
    git push
    ```
 
+4. 切换远程仓库地址：
+   
+   ```bash
+   git remote set-url origin <url>   
+   git remote add upstream <origin_url> # 给原连接添加别名
+   git remote -v # 查看结果
+   ```
+
 ---
 
 ## 💡 其他
