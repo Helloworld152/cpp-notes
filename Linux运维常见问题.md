@@ -1,6 +1,6 @@
 # Linux运维常见问题
 
-### cron-定时拉起任务
+## cron-定时拉起任务
 
 ```bash
 # 每天凌晨 2 点执行
@@ -18,7 +18,6 @@
 # 每天 6:55 到 16:00 运行（用 start/stop 方式控制）
 55 6 * * 1-5 /path/to/start.sh
 0 16 * * 1-5 /path/to/stop.sh
-
 ```
 
 ```bash
@@ -41,6 +40,23 @@ grep CRON /var/log/cron | tail -n 20
 
 需要注意cron遵循的时区
 
-![](C:\Users\ruanying\AppData\Roaming\marktext\images\2025-09-25-09-01-52-image.png)
+```bash
+(base) zszq@zszq:/data/nano/dailyfactor$ timedatectl
+               Local time: Mon 2025-09-29 08:43:29 CST
+           Universal time: Mon 2025-09-29 00:43:29 UTC
+                 RTC time: Mon 2025-09-29 00:43:33    
+                Time zone: Asia/Shanghai (CST, +0800) 
+System clock synchronized: no                         
+              NTP service: active                     
+          RTC in local TZ: no   
+```
+
+如果时区已经改成中国时区，但是cron依然是按美国时区运行，则可能是修改时区后没有重启cron服务
+
+```bash
+systemctl status cron
+
+sudo service cron restart       # Ubuntu/Debian
+```
 
 
