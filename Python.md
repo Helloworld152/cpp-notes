@@ -36,5 +36,12 @@ pip install --upgrade xxx.whl # 升级安装
 pip install xxx.whl --no-deps # 不自动安装依赖
 pip install --force-reinstall xxx.whl # 强制安装，适用于版本号一样，需要强制更新
 ```
-
-
+## jupyter
+### 安装
+```bash
+pip install jupyterlab
+```
+### 启动
+```bash
+jupyter lab
+```
