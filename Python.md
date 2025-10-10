@@ -36,6 +36,7 @@ pip install --upgrade xxx.whl # 升级安装
 pip install xxx.whl --no-deps # 不自动安装依赖
 pip install --force-reinstall xxx.whl # 强制安装，适用于版本号一样，需要强制更新
 ```
+<<<<<<< HEAD
 
 ## 日志包 loguru
 
@@ -85,4 +86,14 @@ wget https://repo.anaconda.com/archive/Anaconda3-2025.06-1-Linux-x86_64.sh
 bash Anaconda3-2025.06-1-Linux-x86_64.sh
 
 conda update -n base -c defaults conda
+=======
+## jupyter
+### 安装
+```bash
+pip install jupyterlab
+```
+### 启动
+```bash
+jupyter lab
+>>>>>>> e1057d71aa0b13795a4885cb3caaf70a884887fe
 ```
