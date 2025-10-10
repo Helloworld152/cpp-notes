@@ -37,4 +37,52 @@ pip install xxx.whl --no-deps # 不自动安装依赖
 pip install --force-reinstall xxx.whl # 强制安装，适用于版本号一样，需要强制更新
 ```
 
+## 日志包 loguru
 
+```python
+from loguru import logger
+import time
+import os
+
+def setup_logging():
+    """
+    设置日志配置，输出到monitor_log文件夹中的单个文件
+    """
+    # 使用已存在的monitor_log目录
+    log_dir = os.path.join(os.path.dirname(__file__), "monitor_log")
+
+    # 移除默认的stderr输出
+    logger.remove()
+
+    # 按日期命名的单个日志文件
+    today = datetime.now().strftime("%Y%m%d")
+
+    # 添加所有级别的日志到单个文件
+    logger.add(
+        os.path.join(log_dir, f"sip_monitor_{today}.log"),
+        rotation="1 day",  # 每天轮转
+        retention="30 days",  # 保留30天
+        level="INFO",  # 包含info以上级别
+        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} | {message}",
+        encoding="utf-8"
+    )
+
+    # 同时在控制台输出
+    logger.add(
+        lambda msg: print(msg, end=""),
+        level="INFO",
+        format="<green>{time:HH:mm:ss}</green> | <level>{level}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | <level>{message}</level>"
+    )
+```
+
+## Linux配置anaconda
+
+链接：[https://repo.anaconda.com/archive/](https://repo.anaconda.com/archive/)
+
+```bash
+# 例如下载 Python 3.12 版本的 64 位安装包
+wget https://repo.anaconda.com/archive/Anaconda3-2025.06-1-Linux-x86_64.sh
+bash Anaconda3-2025.06-1-Linux-x86_64.sh
+
+conda update -n base -c defaults conda
+```

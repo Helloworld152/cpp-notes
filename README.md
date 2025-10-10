@@ -40,8 +40,6 @@
 
 指定变量或类型的对齐方式
 
-
-
 ### AoS vs SoA
 
 - **AoS (Array of Structures)**：每个对象的所有字段连续
@@ -58,12 +56,18 @@ std::vector<double> prices;
 std::vector<int> volumes;
 ```
 
-
-
 ### 
 
 ## CMake
 
 ```cmake
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # 生成compile_commands.json
+```
+
+## explicit
+
+主要用于 **构造函数**（有时也用于转换操作符），防止 **隐式类型转换**，避免一些容易被忽略的编程错误
+
+```cpp
+
 ```
