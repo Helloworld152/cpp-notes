@@ -40,8 +40,6 @@
 
 指定变量或类型的对齐方式
 
-
-
 ### AoS vs SoA
 
 - **AoS (Array of Structures)**：每个对象的所有字段连续
@@ -57,8 +55,6 @@ std::vector<Tick> ticks;
 std::vector<double> prices;
 std::vector<int> volumes;
 ```
-
-
 
 ### 
 

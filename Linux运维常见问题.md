@@ -58,5 +58,3 @@ systemctl status cron
 
 sudo service cron restart       # Ubuntu/Debian
 ```
-
-
