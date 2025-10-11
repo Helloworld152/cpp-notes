@@ -58,3 +58,98 @@ systemctl status cron
 
 sudo service cron restart       # Ubuntu/Debian
 ```
+
+## 后台运行程序
+
+```bash
+nohup python your_script.py > log.txt 2>&1 &
+```
+
+- `nohup`：忽略挂起信号，关掉终端程序也继续跑。
+
+- `> log.txt 2>&1`：把标准输出和错误输出都写到 log.txt 里。
+
+- `&`：放到后台运行
+
+### 重定向运算符
+
+```bash
+# >:覆盖写入
+# >>:追加写入
+# > /dev/null:丢弃标准输出
+```
+
+## 部署mongdb
+
+你想把 MongoDB 变成 **Linux 服务（systemd 管理）**，这样开机自动启动、可以随时 `start/stop/restart`，在 WSL 里也可以这么做（WSL2 需要开启 systemd 支持）。我给你一个最简单的例子。
+
+---
+
+### 1. 创建 systemd 服务文件
+
+假设 MongoDB 安装在 `~/mongodb-linux-x86_64-ubuntu2404-8.2.1/bin`，数据目录是 `~/mongo_data`：
+
+```bash
+sudo nano /etc/systemd/system/mongod.service
+```
+
+内容如下：
+
+```ini
+[Unit]
+Description=MongoDB Database Server
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/home/ruanying/mongodb-linux-x86_64-ubuntu2404-8.2.1/bin/mongod --dbpath /home/ruanying/mongo_data --logpath /home/ruanying/mongo_data/mongod.log --fork
+ExecStop=/home/ruanying/mongodb-linux-x86_64-ubuntu2404-8.2.1/bin/mongod --shutdown --dbpath /home/ruanying/mongo_data
+Restart=always
+User=ruanying
+Group=ruanying
+
+[Install]
+WantedBy=multi-user.target
+```
+
+关键点：
+
+- `--fork`：让 `mongod` 后台运行
+
+- `--logpath`：写日志
+
+- `User` 和 `Group`：使用你的用户启动，不用 sudo
+
+---
+
+### 2. 重新加载 systemd 并启动
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable mongod   # 开机自启
+sudo systemctl start mongod    # 启动服务
+```
+
+---
+
+### 3. 查看状态
+
+```bash
+sudo systemctl status mongod
+```
+
+你应该能看到 `active (running)`，说明 MongoDB 已经在后台运行了。
+
+---
+
+### 4. 管理服务命令
+
+- 停止：`sudo systemctl stop mongod`
+
+- 重启：`sudo systemctl restart mongod`
+
+- 查看日志：`journalctl -u mongod -f`
+
+---
+
+> > > > > > > 

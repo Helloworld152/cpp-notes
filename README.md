@@ -63,3 +63,21 @@ std::vector<int> volumes;
 ```cmake
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # 生成compile_commands.json
 ```
+
+## explicit
+
+主要用于 **构造函数**（有时也用于转换操作符），防止 **隐式类型转换**，避免一些容易被忽略的编程错误
+
+```cpp
+#include <iostream>
+class MyClass {
+public:
+    explicit MyClass(int x) { std::cout << "x = " << x << std::endl; }
+};
+
+int main() {
+    // MyClass a = 10; // ❌ 编译错误，禁止隐式转换
+    MyClass b(10);      // ✅ 正确，显式调用构造函数
+    return 0;
+}
+```
