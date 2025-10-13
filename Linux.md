@@ -1,5 +1,13 @@
 # Linux
 
+## 常用命令
+
+### find
+
+```bash
+find . -name "filename" # 在当前目录及子目录查找文件
+```
+
 ## 共享内存
 
 ```cpp

@@ -14,10 +14,12 @@ deactivate                    # 退出虚拟环境
 ```bash
 pip install -r requirements.txt     # 从配置文件安装依赖
 pip install package_name            # 安装包
+pip install package_name -i https://pypi.tuna.tsinghua.edu.cn/simple # 临时切换源
 pip install package_name==1.2.3     # 安装指定版本
 pip install -U package_name         # 升级包
 pip uninstall package_name          # 卸载包
 pip list                            # 列出已安装包
+pip config list                     # 检查当前源
 pip show package_name               # 查看包信息
 pip freeze > requirements.txt       # 导出依赖
 ```
@@ -37,7 +39,7 @@ pip install xxx.whl --no-deps # 不自动安装依赖
 pip install --force-reinstall xxx.whl # 强制安装，适用于版本号一样，需要强制更新
 ```
 
-<<<<<<< HEAD
+
 
 ## 日志包 loguru
 
@@ -77,6 +79,14 @@ def setup_logging():
     )
 ```
 
+## jupyter
+
+### 安装
+
+```bash
+
+```
+
 ## Linux配置anaconda
 
 链接：[https://repo.anaconda.com/archive/](https://repo.anaconda.com/archive/)
@@ -87,11 +97,6 @@ wget https://repo.anaconda.com/archive/Anaconda3-2025.06-1-Linux-x86_64.sh
 bash Anaconda3-2025.06-1-Linux-x86_64.sh
 
 conda update -n base -c defaults conda
-=======
-## jupyter
-### 安装
-```bash
-pip install jupyterlab
 ```
 
 ### 启动
