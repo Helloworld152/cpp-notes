@@ -36,6 +36,7 @@ pip install --upgrade xxx.whl # 升级安装
 pip install xxx.whl --no-deps # 不自动安装依赖
 pip install --force-reinstall xxx.whl # 强制安装，适用于版本号一样，需要强制更新
 ```
+
 <<<<<<< HEAD
 
 ## 日志包 loguru
@@ -92,8 +93,43 @@ conda update -n base -c defaults conda
 ```bash
 pip install jupyterlab
 ```
+
 ### 启动
+
 ```bash
 jupyter lab
->>>>>>> e1057d71aa0b13795a4885cb3caaf70a884887fe
 ```
+
+## Windows anaconda安装及配置
+
+链接：https://repo.anaconda.com/archive/
+
+### Windows配置jupyter lab默认打开路径
+
+要让 **JupyterLab 在 D 盘根目录** 打开，简要步骤如下：
+
+1. **生成配置文件（如果没生成过）**
+
+```bash
+jupyter lab --generate-config
+```
+
+2. **编辑配置文件**
+- 配置文件路径：`C:\Users\<用户名>\.jupyter\jupyter_lab_config.py`
+
+- 找到并修改这一行：
+
+```python
+c.LabApp.notebook_dir = 'D:/'
+```
+
+3. **启动 JupyterLab**
+- 通过 **Anaconda Navigator** 或命令行启动，默认打开 D 盘根目录
+4. **可选快捷方式**
+- 创建桌面快捷方式，目标写：
+
+```bash
+jupyter lab --notebook-dir="D:/"
+```
+
+- 双击即可直接打开 D 盘根目录。
