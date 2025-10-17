@@ -4,3 +4,4 @@
 - [Linux常见命令](./Linux常见命令.md)
 - [Linux运维相关问题](./Linux运维常见问题.md)
 - [Python常见问题](./Python.md)
+- [开源项目部署教程](./开源项目搭建文档.md)
