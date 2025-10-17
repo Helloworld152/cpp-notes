@@ -39,8 +39,6 @@ pip install xxx.whl --no-deps # 不自动安装依赖
 pip install --force-reinstall xxx.whl # 强制安装，适用于版本号一样，需要强制更新
 ```
 
-
-
 ## 日志包 loguru
 
 ```python
@@ -79,14 +77,6 @@ def setup_logging():
     )
 ```
 
-## jupyter
-
-### 安装
-
-```bash
-
-```
-
 ## Linux配置anaconda
 
 链接：[https://repo.anaconda.com/archive/](https://repo.anaconda.com/archive/)
@@ -97,12 +87,6 @@ wget https://repo.anaconda.com/archive/Anaconda3-2025.06-1-Linux-x86_64.sh
 bash Anaconda3-2025.06-1-Linux-x86_64.sh
 
 conda update -n base -c defaults conda
-```
-
-### 启动
-
-```bash
-jupyter lab
 ```
 
 ## Windows anaconda安装及配置

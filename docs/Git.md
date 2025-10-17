@@ -2,6 +2,10 @@
 
 ---
 
+![git.jpg](C:\Users\ruanying\Pictures\git.jpg)
+
+
+
 ## 📂 仓库操作
 
 ```bash
