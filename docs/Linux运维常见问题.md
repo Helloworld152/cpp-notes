@@ -59,6 +59,65 @@ systemctl status cron
 sudo service cron restart       # Ubuntu/Debian
 ```
 
+### cron定时启动脚本报错：找不到可执行文件
+
+#### **一、问题现象**
+
+在命令行手动执行脚本：
+
+```bash
+/home/rying/qatradegateway/qactpmdgateway/run_multi_1.sh
+```
+
+可以正常启动程序；  
+但用 cron 定时执行时，日志中报错：
+
+```
+./bin/market_data_server: not found
+```
+
+或程序无法启动。
+
+---
+
+#### **二、问题原因**
+
+1. **工作目录不同**  
+   cron 执行任务时默认工作目录不是脚本所在路径（通常是 `/`），  
+   所以脚本中的相对路径（如 `./bin/...`）会找不到。
+
+2. **环境变量缺失**  
+   cron 运行环境不会加载用户的 `~/.bashrc` 或 `~/.profile`，  
+   因此 `PATH`、`LD_LIBRARY_PATH` 等变量可能为空，导致依赖库或可执行文件找不到。
+
+3. **执行环境不完整**  
+   一些命令在交互式 shell 可用，但在 cron 环境下不可用（例如通过别名、软链接、相对路径调用）。
+
+---
+
+#### **三、解决方案**
+
+**方案1：在脚本开头显式切换目录**
+
+```bash
+cd /home/rying/qatradegateway/qactpmdgateway || exit 1
+```
+
+使用绝对路径运行程序：
+
+```bash
+/home/rying/qatradegateway/qactpmdgateway/bin/market_data_server ...
+```
+
+---
+
+**方案3：使用绝对路径调用 Bash 与命令**  
+在 crontab 中写完整路径：
+
+```
+* * * * * /bin/bash /home/rying/qatradegateway/qactpmdgateway/run_multi_1.sh
+```
+
 ## 后台运行程序
 
 ```bash
@@ -152,4 +211,28 @@ sudo systemctl status mongod
 
 ---
 
-> > > > > > > 
+## 监控进程脚本
+
+```shell
+#!/bin/bash
+
+# 配置部分
+LOG=/path/logs/process_monitor.log
+CHECK_INTERVAL=60    # 检查间隔秒数
+PROCESSES=("process_name_1" "process_name_2" "process_name_3")  # 要监控的进程名
+
+pkill -f -9 "monitor_process.sh"
+echo "======== $(date) 监控启动 ========" >> $LOG
+
+while true; do
+    for PROC in "${PROCESSES[@]}"; do
+        if pgrep -f "$PROC" > /dev/null 2>&1; then
+            echo "$(date '+%F %T') ✅ $PROC 运行中" >> $LOG
+        else
+            echo "$(date '+%F %T') ❌ $PROC 未运行..." >> $LOG
+            # 这里可以根据需要自动重启
+        fi
+    done
+    sleep $CHECK_INTERVAL
+done
+```
