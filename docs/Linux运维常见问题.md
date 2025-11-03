@@ -271,15 +271,15 @@ done
 
 ## auditd审计工具使用
 
-- 安装启动：`sudo apt install auditd` `sudo systemctl enable --now auditd`
+- 安装启动：`sudo apt install auditd` `sudo systemctl enable --now auditd`
 
-- 添加规则：`sudo auditctl -w /dev/shm/InsMapSharedMemory -p wa -k insmap`（-w 路径，-p 操作权限，-k 过滤标签）。
+- 添加规则：`sudo auditctl -w /dev/shm/InsMapSharedMemory -p wa -k insmap`（-w 路径，-p 操作权限，-k 过滤标签）。
 
-- 如需多文件重复添加即可；也可用 -F 指定进程或用户过滤。
+- 如需多文件重复添加即可；也可用 -F 指定进程或用户过滤。
 
-- 查看事件：`sudo ausearch -k insmap` 搜索关键字；`sudo aureport -f -i 汇总文件操作`；日志原文在 /var/log/audit/audit.log。
+- 查看事件：`sudo ausearch -k insmap` 搜索关键字；`sudo aureport -f -i 汇总文件操作`；日志原文在 /var/log/audit/audit.log。
 
-- 删除规则：`sudo auditctl -W /dev/shm/InsMapSharedMemory`（或重启 auditd 清空临时规则）。
+- 删除规则：`sudo auditctl -W /dev/shm/InsMapSharedMemory`（或重启 auditd 清空临时规则）。
 
 借此可定位删除共享内存的具体进程/用户。
 
@@ -375,10 +375,22 @@ done
   * **语法严格：** 行尾**严禁**出现多余空格或中文注释（刚才你遇到的坑）。
   * **权限地狱：** 如果日志目录权限比较开放（如 775），必须配置 `su <owner> <group>`，否则会报 `insecure permissions`。
   * **Crontab 依赖：** Logrotate 不是守护进程。如果你的机器（或 Docker 容器）没有运行 Cron 服务，Logrotate 永远不会自动触发。
-  * **Copytruncate 的副作用：** 在“复制”和“截断”之间的极短毫秒内写入的日志**可能会丢失**。对于高频交易（HFT）系统，这丢失的几行日志可能是致命的。
+  * **Copytruncate 的副作用：** 在"复制"和"截断"之间的极短毫秒内写入的日志**可能会丢失**。对于高频交易（HFT）系统，这丢失的几行日志可能是致命的。
       * *Quant 建议：* 极其重要的交易日志，建议由程序内部控制切割（如使用 `spdlog` 或 `glog`），或者接受这极小概率的丢失。
 
 -----
 
 **下一步建议：**
 既然配置已经跑通，建议你明天早上检查一下 `/var/log/open-trade-gateway/` 目录下是否自动生成了带日期后缀的压缩包，确认 Cron 任务正常工作。
+
+## 部署redis
+```bash
+sudo apt update
+sudo apt install redis-server -y
+sudo systemctl enable redis-server  # 设置开机自启
+sudo systemctl start redis-server   # 启动服务
+```
+### 配置
+文件路径：`/etc/redis/redis.conf`
+
+如果需要允许远程连接，bind应设置为 0.0.0.0 或特定的内网 IP；
