@@ -217,22 +217,70 @@ sudo systemctl status mongod
 #!/bin/bash
 
 # 配置部分
-LOG=/path/logs/process_monitor.log
+LOG=/home/rying/process_monitor.log
 CHECK_INTERVAL=60    # 检查间隔秒数
-PROCESSES=("process_name_1" "process_name_2" "process_name_3")  # 要监控的进程名
+PROCESSES=("market_data_server" "open-trade-mdservice" "/usr/local/bin/open-trade-gateway")  # 要监控的进程名
+SHM_SEGMENTS=("InsMapSharedMemory" "qamddata")                                # 要监控的共享内存段
+PORTS=("7788" "7799")                                                         # 要监控的端口
 
-pkill -f -9 "monitor_process.sh"
+CURRENT_PID=$$
+OLD_PIDS=$(pgrep -f "monitor_process.sh" | grep -v "^$CURRENT_PID$")
+if [ -n "$OLD_PIDS" ]; then
+    for PID in $OLD_PIDS; do
+        kill "$PID" 2>/dev/null
+    done
+fi
+
 echo "======== $(date) 监控启动 ========" >> $LOG
 
 while true; do
     for PROC in "${PROCESSES[@]}"; do
-        if pgrep -f "$PROC" > /dev/null 2>&1; then
-            echo "$(date '+%F %T') ✅ $PROC 运行中" >> $LOG
+        PID=$(pgrep -f "$PROC")
+        if [ -n "$PID" ]; then
+            if [ "$PROC" == "market_data_server" ]; then
+                THREAD_COUNT=$(ps -o nlwp= -p $PID)
+                echo "$(date '+%F %T') [PROC] ✅ $PROC PID:$PID 运行中, 线程数: $THREAD_COUNT" >> $LOG
+            else
+                echo "$(date '+%F %T') [PROC] ✅ $PROC PID:$PID 运行中" >> $LOG
+            fi
         else
-            echo "$(date '+%F %T') ❌ $PROC 未运行..." >> $LOG
-            # 这里可以根据需要自动重启
+            echo "$(date '+%F %T') [PROC] ❌ $PROC 未运行..." >> $LOG
         fi
     done
+
+    for SEG in "${SHM_SEGMENTS[@]}"; do
+        if [ -e "/dev/shm/$SEG" ]; then
+            SIZE=$(stat --format="%s" "/dev/shm/$SEG" 2>/dev/null)
+            echo "$(date '+%F %T') [SHM] ✅ $SEG 存在, 大小: $SIZE" >> $LOG
+        else
+            echo "$(date '+%F %T') [SHM] ❌ $SEG 缺失..." >> $LOG
+        fi
+    done
+
+    for PORT in "${PORTS[@]}"; do
+        if ss -ltn | grep -q ":$PORT "; then
+            echo "$(date '+%F %T') [PORT] ✅ 端口 $PORT 正在监听" >> $LOG
+        else
+            echo "$(date '+%F %T') [PORT] ❌ 端口 $PORT 未监听..." >> $LOG
+        fi
+    done
+
     sleep $CHECK_INTERVAL
 done
 ```
+
+
+
+## auditd审计工具使用
+
+- 安装启动：`sudo apt install auditd` `sudo systemctl enable --now auditd`
+
+- 添加规则：`sudo auditctl -w /dev/shm/InsMapSharedMemory -p wa -k insmap`（-w 路径，-p 操作权限，-k 过滤标签）。
+
+- 如需多文件重复添加即可；也可用 -F 指定进程或用户过滤。
+
+- 查看事件：`sudo ausearch -k insmap` 搜索关键字；`sudo aureport -f -i 汇总文件操作`；日志原文在 /var/log/audit/audit.log。
+
+- 删除规则：`sudo auditctl -W /dev/shm/InsMapSharedMemory`（或重启 auditd 清空临时规则）。
+
+借此可定位删除共享内存的具体进程/用户。
