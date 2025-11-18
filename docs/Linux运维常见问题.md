@@ -269,8 +269,6 @@ while true; do
 done
 ```
 
-
-
 ## auditd审计工具使用
 
 - 安装启动：`sudo apt install auditd` `sudo systemctl enable --now auditd`
