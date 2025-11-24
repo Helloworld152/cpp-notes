@@ -105,8 +105,6 @@ MiB Swap:   8192.0 total,   8166.5 free,     25.5 used. 375292.7 avail Mem
      29 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/3                                                      
 ```
 
-
-
 ### 1. 系统总览区（第一行）
 
 | **字段**               | **含义**                            | **底层关联**                                                   |
@@ -167,3 +165,29 @@ MiB Swap:   8192.0 total,   8166.5 free,     25.5 used. 375292.7 avail Mem
 | **$\text{\%MEM}$**                                 | 进程占用的物理内存 ($\text{RES}$) 占总物理内存的百分比。                                                                                                                                                                         | -                                                    |
 | **$\text{TIME+}$**                                 | 进程启动以来累计占用的 $\text{CPU}$ 时间。                                                                                                                                                                                 | -                                                    |
 | **$\text{COMMAND}$**                               | 进程启动的命令行名称。                                                                                                                                                                                                  | -                                                    |
+
+## ss
+
+`ss`（socket statistics）是 Linux 下查看网络端口和连接的现代工具，用来完全替代 `netstat`。
+
+```bash
+# 查看所有监听端口（TCP/UDP），含进程信息
+ss -tulnp
+# -t TCP, -u UDP, -l LISTEN, -n 不解析域名, -p 显示进程
+
+# 查看所有已建立的 TCP 连接
+ss -tn state established
+# 用于确认服务是否与外部成功通信
+
+# 查看某个端口是否被占用
+ss -tulnp | grep <端口号>
+# 快速定位占用端口的进程
+
+# 查看某个进程的所有网络连接
+ss -tnp | grep <PID>
+# 判断该进程是否监听端口或对外建立连接
+
+# 查看 TCP 异常状态（排障常用）
+ss -tan | grep CLOSE-WAIT   # 被动关闭方未正确 close，可能程序有 bug
+ss -tan | grep TIME-WAIT    # 主动关闭方较多，连接频繁但一般可接受
+```
