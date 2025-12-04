@@ -6,17 +6,92 @@
 
 `memory_order` 这个是 C++11 里原子操作（`std::atomic`）的一个关键参数，用来告诉编译器和 CPU：**我希望这个原子操作在多线程里的内存可见性和执行顺序是怎样的**。
 
-* `memory_order_relaxed`
+#### 根本原因
+一句话总结：CPU 太快，内存太慢，硬件为了掩盖这个速度差，制造了“私有小金库”。
 
-* `memory_order_consume`
+1. 速度鸿沟： CPU 执行一条指令只需 0.3ns，但完成一次跨核心的缓存同步（MESI）需要 10~100ns。如果不优化，CPU 99% 的时间都在傻等。
 
-* `memory_order_acquire`
+2. 私有缓冲区 (The Culprits)： 为了不等待，硬件引入了两个破坏全局一致性的部件：
 
-* `memory_order_release`
+	* Store Buffer (写缓冲)： 生产者把要写的数据先扔在这里，不一定要立刻刷入 L1 Cache。（这是导致乱序的主犯）
+
+	* Invalidate Queue (失效队列)： 消费者把收到的“缓存失效通知”先堆在这里，不一定立刻处理。
+
+3. 结果： 数据停留在这些私有的、对其他核心不可见的缓冲区中。导致“代码执行完了（在私有视角），但数据还没生效（在全局视角）”。
+
+#### 举例
+场景：Producer 线程 P，Consumer 线程 C
+初始状态： buffer 是空的，head 是 0。
+
+1. P 执行写数据 (buffer[0] = X)：
+
+	* P 的 CPU 发出写指令。
+
+	* 因为这行缓存不在 P 手里（或处于 Shared 状态），P 必须向总线发消息要锁。
+
+	* 为了不等待，P 把数据 X 扔进了自己的 Store Buffer。
+
+	* 此时全局视角：内存里的 buffer[0] 依然是旧值/垃圾。
+
+2. P 执行写信号 (head = 1)：
+
+	* P 的 CPU 发出写指令。
+
+	* 巧了，head 变量刚好在 P 的 L1 Cache 里且是独占（Modified）状态。
+
+	* P 直接把 L1 Cache 里的 head 改成了 1。
+
+	* 此时全局视角：head 已经是 1 了。
+
+3. C 执行读信号 (load head)：
+
+	* C 想读 head。通过缓存一致性协议，C 从 P 的 Cache 里同步到了最新的 head = 1。
+
+	* C 认为： “哈！head 变了，说明 buffer[0] 肯定准备好了！”
+
+4. C 执行读数据 (load buffer[0])：
+
+	* C 去读 buffer[0]。
+
+	* 关键点： P 的 Store Buffer 对 C 是不可见的。
+
+	* C 读到了内存（或自己 Cache）里那个旧的、未被覆盖的垃圾值。
+
+	* （几纳秒后）P 的 Store Buffer 刷新：
+
+	* P 终于拿到了总线锁，把 Store Buffer 里的 X 刷入 L1 Cache。
+
+	* 太晚了，C 已经拿着脏数据去跑策略了。
+
+#### 具体顺序
+* `memory_order_relaxed`：松散序 
+	
+	硬件行为：对 Store Buffer 和 Invalidate Queue “放任不管”。
+
+* `memory_order_consume`：
+
+* `memory_order_acquire`：获取序
+	
+	硬件行为：给 Invalidate Queue 下达“清空指令” (Flush Invalidate Queue)。即强制确认所有cache作废消息都处理完再读数据
+	```cpp
+	size_t head = head_.load(std::memory_order_acquire);
+	```
+
+* `memory_order_release`：释放序
+
+	硬件行为：给 Store Buffer 下达“排空指令” (Drain Store Buffer)。即强制确认所有store buffer写入cache后再改信号
+	```cpp
+	buffer_[head & mask_] = value; // A. 写数据
+	head_.store(head + 1, std::memory_order_release); // B. 改信号
+	```
 
 * `memory_order_acq_rel`
 
-* `memory_order_seq_cst`
+* `memory_order_seq_cst`：顺序一致性
+
+	强制 Store Buffer 里的东西立刻、马上全部刷出去。
+	
+	强制 Invalidate Queue 里的东西立刻、马上全部处理完。
 
 ## CPU缓存和缓存一致性
 

@@ -282,3 +282,103 @@ done
 - 删除规则：`sudo auditctl -W /dev/shm/InsMapSharedMemory`（或重启 auditd 清空临时规则）。
 
 借此可定位删除共享内存的具体进程/用户。
+
+## logrotate
+
+这是一个关于 **Logrotate** 的精华总结，专为 Quant IT 运维场景提炼。
+
+`logrotate` 是 Linux 系统自带的日志管理神器，它通过 **Cron（定时任务）** 每天唤醒一次，负责将旧日志切割、压缩、归档并清理。
+
+-----
+
+### 1\. 标准配置模板
+
+最佳实践是**不要**修改主配置文件 `/etc/logrotate.conf`，而是在 `/etc/logrotate.d/` 目录下为每个服务单独新建配置文件。
+
+**文件路径：** `/etc/logrotate.d/your-service-name`
+
+```nginx
+# 目标日志文件的绝对路径（支持通配符 *.log）
+/var/log/myapp/trading.log {
+    # --- 触发条件 ---
+    daily                   # 按天切割 (可选: weekly, monthly)
+    # size 100M             # 或者按大小切割 (优先级高于时间)
+
+    # --- 保留策略 ---
+    rotate 30               # 保留最近 30 个备份
+    missingok               # 日志文件不存在也不报错
+    notifempty              # 如果日志是空的，就不切割
+
+    # --- 压缩策略 ---
+    compress                # 启用 gzip 压缩
+    delaycompress           # 延后一天压缩（防止切割瞬间程序还在写）
+    dateext                 # 使用日期作为后缀 (如 .log-20251124)
+
+    # --- 关键模式 (二选一) ---
+    # 模式 A: copytruncate (推荐：简单粗暴)
+    # 适用于：程序无法感知日志切割，一直往一个文件句柄里写的情况
+    copytruncate            
+
+    # 模式 B: create + postrotate (传统：需程序配合)
+    # 适用于：Nginx/Apache 等支持信号重载的程序
+    # create 0644 user group
+    # postrotate
+    #     kill -HUP `cat /var/run/myapp.pid`
+    # endscript
+
+    # --- 权限安全 ---
+    # 如果目录权限不是 755/root，必须指定用户
+    su user group
+}
+```
+
+-----
+
+### 2\. 核心参数速查表
+
+| 参数 | 含义 | 备注 |
+| :--- | :--- | :--- |
+| **copytruncate** | **复制并清空** | **最重要参数**。先把内容拷走，瞬间把原文件大小截断为 0。适合大多数 C++/Python/Java 自研程序。 |
+| **rotate N** | 保留 N 份 | 超过 N 份的最旧日志会被删除。 |
+| **dateext** | 日期后缀 | 默认是 `.1`, `.2` 数字后缀，加上这个变成 `-YYYYMMDD`，更利于归档管理。 |
+| **compress** | 压缩 | 默认用 gzip，节省磁盘空间。 |
+| **su user group** | 切换身份 | **解决权限报错**。如果日志目录对其他组可写，必须加上这个，否则 logrotate 拒绝执行。 |
+
+-----
+
+### 3\. 常用命令（运维三板斧）
+
+配置好后，不需要重启任何服务，只需使用以下命令：
+
+1.  **演习（Dry Run）：** 检查语法，看它打算做什么，但不实际执行。
+
+    ```bash
+    sudo logrotate -d /etc/logrotate.d/your-config
+    ```
+
+2.  **强制执行（Force Run）：** 即使没到时间/大小，也强制切割一次（用于验证效果）。
+
+    ```bash
+    sudo logrotate -f /etc/logrotate.d/your-config
+    ```
+
+3.  **查看状态：** 查看上次切割是什么时候。
+
+    ```bash
+    cat /var/lib/logrotate/status
+    ```
+
+-----
+
+### 4\. 常见坑与避雷指南 ⚠️
+
+  * **语法严格：** 行尾**严禁**出现多余空格或中文注释（刚才你遇到的坑）。
+  * **权限地狱：** 如果日志目录权限比较开放（如 775），必须配置 `su <owner> <group>`，否则会报 `insecure permissions`。
+  * **Crontab 依赖：** Logrotate 不是守护进程。如果你的机器（或 Docker 容器）没有运行 Cron 服务，Logrotate 永远不会自动触发。
+  * **Copytruncate 的副作用：** 在“复制”和“截断”之间的极短毫秒内写入的日志**可能会丢失**。对于高频交易（HFT）系统，这丢失的几行日志可能是致命的。
+      * *Quant 建议：* 极其重要的交易日志，建议由程序内部控制切割（如使用 `spdlog` 或 `glog`），或者接受这极小概率的丢失。
+
+-----
+
+**下一步建议：**
+既然配置已经跑通，建议你明天早上检查一下 `/var/log/open-trade-gateway/` 目录下是否自动生成了带日期后缀的压缩包，确认 Cron 任务正常工作。
