@@ -1,5 +1,6 @@
 - [首页](README.md)
 - [Git常用命令](./Git.md)
+- [操作系统配置](./操作系统配置.md)
 - [Linux知识](./Linux.md)
 - [Linux常见命令](./Linux常见命令.md)
 - [Linux运维相关问题](./Linux运维常见问题.md)
