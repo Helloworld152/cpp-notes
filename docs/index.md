@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: 开始阅读
-      link: /C++
+      link: /cpp
     - theme: alt
       text: GitHub
       link: https://github.com/Helloworld152/cpp-notes

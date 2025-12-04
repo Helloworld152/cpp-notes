@@ -13,8 +13,8 @@ export default defineConfig({
       {
         text: 'C++',
         items: [
-          { text: 'C++', link: '/C++' },
-          { text: 'C++量化高性能优化指南', link: '/C++量化高性能优化指南' }
+          { text: 'C++', link: '/cpp' },
+          { text: 'C++量化高性能优化指南', link: '/cpp-hft' }
         ]
       },
       {
