@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/cpp-notes/',
   title: "我的知识库",
   description: "Quant IT Notes",
   themeConfig: {
