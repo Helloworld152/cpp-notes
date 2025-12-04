@@ -396,7 +396,7 @@ Ran tool
 - 数据获取
   - QUANTAXIS.QAFetch.QAQuery_Advance: `QA_fetch_stock_day_adv(code, start, end)` → 返回 `QA_DataStruct_Stock_day`
     
-    ```108:150:QUANTAXIS/QAFetch/QAQuery_Advance.py
+    ```python
     def QA_fetch_stock_day_adv(
     code,
     start='all',
@@ -413,7 +413,7 @@ Ran tool
 - 数据结构
   - QUANTAXIS.QAData.QADataStruct: `QA_DataStruct_Stock_day(init_data_by_df)`
     
-    ```114:146:QUANTAXIS/QAData/QADataStruct.py
+    ```python
     class QA_DataStruct_Stock_day(_quotation_base):
     '''
         股票日线数据
@@ -424,21 +424,21 @@ Ran tool
 - 技术指标
   - QUANTAXIS.QAIndicator.base: `MA(Series, N)`（简单滚动均线）
     
-    ```44:46:QUANTAXIS/QAIndicator/base.py
+    ```python
     def MA(Series, N):
     return pd.Series.rolling(Series, N).mean()
     ```
 - 策略基类与回测
   - 当前代码库导出的是 `QAStrategyCtaBase`（未发现名为 `QACTABase` 的类别名）
     
-    ```279:286:QUANTAXIS/__init__.py
+    ```python
     from QUANTAXIS.QAStrategy.qactabase import QAStrategyCtaBase
     ...
     from QUANTAXIS.QAFactor.featureAnalysis import QAFeatureAnalysis
     ```
   - `QAStrategyCtaBase` 提供回测入口 `run_backtest()`（以及 on_bar 回调等）
     
-    ```181:197:QUANTAXIS/QAStrategy/qactabase.py
+    ```python
     def run_backtest(self):
     self.debug()
     self.acc.save()
@@ -478,7 +478,7 @@ Ran tool
 
 ### 最小修改示意（仅供参考）
 
-```python:/home/rying/QUANTAXIS/myexamples/test.py
+```python
 import QUANTAXIS as QA
 from QUANTAXIS.QAStrategy.qactabase import QAStrategyCtaBase as QACTABase
 from QUANTAXIS.QAIndicator.base import MA
